@@ -1,21 +1,36 @@
-from html.parser import HTMLParser
-from urllib.request import urlopen
-import ssl
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.action_chains import ActionChains
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
 
 
-def start(page_url):
-    try:
-        # ssl certs, CERT_NONE is the default
-        gcontext = ssl.SSLContext()
-        page = urlopen(page_url, context=gcontext)
-        # check if the content is html, and retrieve it
-        if 'text/html' in page.getheader('Content-Type'):
-            html_bytes = page.read()
-            html_string = html_bytes.decode('utf-8')
-            print(html_string)
-    except Exception as e:
-        print(e)
-    print('finished fetching')
+passW = ''
+emailA = ''
 
 
-start('https://www.nike.com/launch')
+driver.get('https://www.nike.com/launch/t/kd13-hype')
+
+# find the login button
+login_box = driver.find_element_by_xpath("//button[@class='join-log-in text-color-grey prl3-sm pt2-sm pb2-sm fs12-sm d-sm-b']")
+driver.implicitly_wait(10)
+login_box.click()
+
+# fetching the text boxes and submit button
+email_box = driver.find_element_by_xpath("//div[@class = 'nike-unite-text-input emailAddress nike-unite-component empty']/input[1]")
+password_box = driver.find_element_by_xpath("//div[@class = 'nike-unite-text-input password nike-unite-password-input nike-unite-component empty']/input[1]")
+login_button = driver.find_element_by_xpath("//div[@class = 'nike-unite-submit-button loginSubmit nike-unite-component']/input[1]")
+
+# # sending the info to the text boxes and clicking submit
+email_box.send_keys(emailA)
+password_box.send_keys(passW)
+login_button.click()
+
+# pick your size
+size_btn = driver.find_element_by_xpath("//button[contains(text(), 'M 11') or contains(text(), '11')]")
+
+driver.implicitly_wait(10)
+ActionChains(driver).move_to_element(size_btn).click(size_btn).perform()
+
+
+

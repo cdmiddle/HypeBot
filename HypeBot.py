@@ -2,18 +2,43 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
 
-driver = webdriver.Chrome(ChromeDriverManager().install())
+def scroll_shim(passed_in_driver, object):
+        x = object.location['x']
+        y = object.location['y']
+        scroll_by_coord = 'window.scrollTo(%s,%s);' % (
+            x,
+            y
+        )
+        scroll_nav_out_of_way = 'window.scrollBy(0, -240);'
+        passed_in_driver.execute_script(scroll_by_coord)
+        passed_in_driver.execute_script(scroll_nav_out_of_way)
+
+# def check_cart(passed_in_driver):
+#     # cart_count = passed_in_driver.find_element_by_xpath("//span[@class='cart-count-jewel small fs10-sm lh10-sm d-sm-b text-color-white bg-accent ta-sm-c']").getAttribute("innerHTML")
+#     return cart_count
+
+def clkButton(passed_in_driver, object):
+    if 'firefox' in passed_in_driver.capabilities['browserName']:
+        scroll_shim(passed_in_driver, object)
+
+    add = ActionChains(passed_in_driver)
+    add.move_to_element(object)
+    add.click()
+    add.perform()
 
 
-passW = ''
-emailA = ''
+driver = webdriver.Firefox()
+
+
+passW = 'Bob9100t'
+emailA = 'middletoncourt@gmail.com'
 
 
 driver.get('https://www.nike.com/launch/t/kd13-hype')
 
 # find the login button
 login_box = driver.find_element_by_xpath("//button[@class='join-log-in text-color-grey prl3-sm pt2-sm pb2-sm fs12-sm d-sm-b']")
-driver.implicitly_wait(10)
+
 login_box.click()
 
 # fetching the text boxes and submit button
@@ -26,11 +51,17 @@ email_box.send_keys(emailA)
 password_box.send_keys(passW)
 login_button.click()
 
-# pick your size
-size_btn = driver.find_element_by_xpath("//button[contains(text(), 'M 11') or contains(text(), '11')]")
+# pick your size and add to cart
+# while (check_cart(driver) < 1):
+size_btn = driver.find_element_by_xpath("//button[starts-with(text(), 'M 11') or starts-with(text(), '11')]")
 
-driver.implicitly_wait(10)
-ActionChains(driver).move_to_element(size_btn).click(size_btn).perform()
+clkButton(driver, size_btn)
+
+addToCart_btn = driver.find_element_by_xpath("//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
+
+clkButton (driver, addToCart_btn)
+
+driver.get('https://www.nike.com/us/en/cart')
 
 
 

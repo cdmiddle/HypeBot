@@ -30,7 +30,7 @@ def clkButton(passed_in_driver, object):
 driver = webdriver.Firefox()
 
 
-passW = 'Bob9100t'
+passW = ''
 emailA = 'middletoncourt@gmail.com'
 
 

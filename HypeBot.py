@@ -1,5 +1,6 @@
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 
 def scroll_shim(passed_in_driver, object):
@@ -20,6 +21,8 @@ def scroll_shim(passed_in_driver, object):
 def clkButton(passed_in_driver, object):
     if 'firefox' in passed_in_driver.capabilities['browserName']:
         scroll_shim(passed_in_driver, object)
+    
+    passed_in_driver.implicitly_wait(500)
 
     add = ActionChains(passed_in_driver)
     add.move_to_element(object)
@@ -53,15 +56,27 @@ login_button.click()
 
 # pick your size and add to cart
 # while (check_cart(driver) < 1):
-size_btn = driver.find_element_by_xpath("//button[starts-with(text(), 'M 11') or starts-with(text(), '11')]")
+try:
+    xpath = ("//button[starts-with(text(), 'M 11') or starts-with(text(), '11') and not(@disabled)]")
+    size_btn = WebDriverWait(driver, 10).until(
+            lambda driver : driver.find_element_by_xpath(xpath))
+finally:
+    print('size selected')
 
 clkButton(driver, size_btn)
 
 addToCart_btn = driver.find_element_by_xpath("//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
 
-clkButton (driver, addToCart_btn)
+clkButton(driver, addToCart_btn)
+
 
 driver.get('https://www.nike.com/us/en/cart')
+
+checkout_btn = driver.find_element_by_xpath("//button[contains(text(), 'Checkout')]")
+
+clkButton(driver, checkout_btn)
+
+placeOrder_btn = driver.find_element_by_xpath("//button[contains(text(), 'Place order')]")
 
 
 

@@ -54,7 +54,7 @@ def capture_page(driver, name):
 driver = webdriver.Firefox()
 
 
-passW = 'Bob9100t'
+passW = ''
 emailA = 'middletoncourt@gmail.com'
 shoe_size = '13'
 

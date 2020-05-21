@@ -61,7 +61,7 @@ def find_element(xpath):
 driver = webdriver.Firefox()
 
 
-passW = 'Bob9100t'
+passW = ''
 emailA = 'middletoncourt@gmail.com'
 shoe_size = '13'
 cvv = '132'

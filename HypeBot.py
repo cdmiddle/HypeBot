@@ -64,7 +64,7 @@ driver = webdriver.Firefox()
 passW = ''
 emailA = 'middletoncourt@gmail.com'
 shoe_size = '13'
-cvv = '132'
+cvv = ''
 release_date = datetime.datetime(2020, 5, 21, 17, 59)
 now = datetime.datetime.now()
 

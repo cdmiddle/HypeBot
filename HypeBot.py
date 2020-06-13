@@ -4,30 +4,27 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException, TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from random import randrange
 
 class NormalPurchase:
 
-    driver = webdriver.Firefox()
     passW = ''
     emailA = ''
     shoe_size = ''
     cvv = ''
-    release_date = ''
     product_url = ''
 
-    def __init__(self, password, email, shoesize, cvv, releasedate, producturl):
+    def __init__(self, password, email, shoesize, cvv, producturl, interwebdriver):
         super().__init__()
-        NormalPurchase.passW = password
-        NormalPurchase.emailA = email
-        NormalPurchase.shoe_size = shoesize
-        NormalPurchase.cvv = cvv
-        # NormalPurchase.release_date = datetime.strptime('releasedate' + ' 10:00 AM', '%b %d %Y %I:%M%p')
-        NormalPurchase.release_date = datetime.strptime(releasedate + ' 9:44PM', '%b %d %Y %I:%M%p')
-        NormalPurchase.product_url = producturl
+        self.passW = password
+        self.emailA = email
+        self.shoe_size = shoesize
+        self.cvv = cvv
+        self.product_url = producturl
+        self.driver = interwebdriver
         self.login()
         self.select_size()
         self.checkout()
@@ -69,62 +66,65 @@ class NormalPurchase:
             f.write(driver.page_source)
 
     @staticmethod
-    def find_element(xpath):
+    def find_element(driver, xpath):
         try:
-            button = WebDriverWait(NormalPurchase.driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
+            button = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, xpath)))
             return button
-        except TimeoutError:
+        except (TimeoutError, TimeoutException):
             print('timedout :/ : ' + xpath)
 
 
     def login(self):
         self.driver.get(self.product_url)
         # find the login button
-        login_icon = NormalPurchase.find_element("//button[@class='join-log-in text-color-grey prl3-sm pt2-sm pb2-sm fs12-sm d-sm-b']")
+        login_icon = NormalPurchase.find_element(self.driver, "//button[@class='join-log-in text-color-grey prl3-sm pt2-sm pb2-sm fs12-sm d-sm-b']")
         login_icon.click()
         # fetching the text boxes and submit button
-        email_box = NormalPurchase.find_element("//div[@class = 'nike-unite-text-input emailAddress nike-unite-component empty']/input[1]")
-        password_box = NormalPurchase.find_element("//div[@class = 'nike-unite-text-input password nike-unite-password-input nike-unite-component empty']/input[1]")
-        login_button = NormalPurchase.find_element("//div[@class = 'nike-unite-submit-button loginSubmit nike-unite-component']/input[1]")
+        email_box = NormalPurchase.find_element(self.driver, "//div[@class = 'nike-unite-text-input emailAddress nike-unite-component empty']/input[1]")
+        password_box = NormalPurchase.find_element(self.driver, "//div[@class = 'nike-unite-text-input password nike-unite-password-input nike-unite-component empty']/input[1]")
+        login_button = NormalPurchase.find_element(self.driver, "//div[@class = 'nike-unite-submit-button loginSubmit nike-unite-component']/input[1]")
         # sending the info to the text boxes and clicking submit
         email_box.send_keys(self.emailA)
         password_box.send_keys(self.passW)
         NormalPurchase.clk_button(self.driver, login_button)
-        login_window = NormalPurchase.find_element("//div[@class = 'ncss-col-sm-12 full bg-white ta-sm-r']")
+        login_window = NormalPurchase.find_element(self.driver, "//div[@class = 'ncss-col-sm-12 full bg-white ta-sm-r']")
         NormalPurchase.wait_for_invisibility(login_window)
-        # wait until the release time and then refresh the page
-        now = datetime.now()
-        sleep_time = abs(self.release_date - now) if abs(self.release_date - now).seconds < 0 else 0
-        time.sleep(sleep_time)
         
 
     def select_size(self):
         self.driver.refresh()
         # # pick your size and add to cart
-        size_btn = NormalPurchase.find_element("//button[starts-with(text(), 'M " + self.shoe_size + "') or starts-with(text(), " + self.shoe_size + ")]")
+        size_btn = NormalPurchase.find_element(self.driver, "//button[starts-with(text(), 'M " + self.shoe_size + "') or starts-with(text(), " + self.shoe_size + ")]")
         # capture_page(driver, 'clcik.html')
         NormalPurchase.clk_button(self.driver, size_btn)
-        addToCart_btn = NormalPurchase.find_element("//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
+        addToCart_btn = NormalPurchase.find_element(self.driver, "//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
         # NormalPurchase.capture_page(self.driver, 'addtocart.html')
         NormalPurchase.clk_button(self.driver, addToCart_btn)
-        proceed = NormalPurchase.find_element("//div[@class = 'cart-item-modal-content-container ncss-container p6-sm bg-white']")
+        # try:
+        #     proceed = self.driver.find_element_by_xpath("//span[class='cart-count-jewel small fs10-sm lh10-sm d-sm-b text-color-white bg-accent ta-sm-c']")
+        # except NoSuchElementException:
+        #     self.select_size()
+        
 
     def checkout(self):
         self.driver.get('https://www.nike.com/us/en/cart')
-        checkout_btn = NormalPurchase.find_element("//div[@class = 'ncss-col-sm-12 css-gajhq5']/button[@class = 'css-8k8rmj e1qel1sl4']")
+        try:
+           checkout_btn = WebDriverWait(self.driver, 2).until(EC.element_to_be_clickable((By.XPATH, "//div[@class = 'ncss-col-sm-12 css-gajhq5']/button[@class = 'css-8k8rmj e1qel1sl4']")))
+        except (AttributeError, NoSuchElementException):
+            self.select_size()
         # capture_page(driver, "checkout.html")
         NormalPurchase.clk_button(self.driver, checkout_btn)
         # interact with the iframe for credit card info
         try :
             # a special case, sometimes the cvv code is required, possibly when the card has been used by another acount in recent history
-            iframe = NormalPurchase.find_element_by_xpath("//iframe[@class = 'redit-card-iframe-cvv mt1 u-full-width']")
+            iframe = self.driver.find_element_by_xpath("//iframe[@class = 'redit-card-iframe-cvv mt1 u-full-width']")
             self.driver.switch_to.frame(iframe)
-            cvv_input = NormalPurchase.find_element("//input[@class = 'mod-input ncss-input pt2-sm pr4-sm pb2-sm pl4-sm']")
+            cvv_input = NormalPurchase.find_element(self.driver, "//input[@class = 'mod-input ncss-input pt2-sm pr4-sm pb2-sm pl4-sm']")
             cvv_input.send_keys(self.cvv)
             self.driver.switch_to.default_content()
-        except AttributeError:
+        except (NoSuchElementException, AttributeError):
             pass
-        placeOrder_btn = NormalPurchase.find_element("//button[@class = 'd-lg-ib fs14-sm ncss-brand ncss-btn-accent pb2-lg pb3-sm prl5-sm pt2-lg pt3-sm u-uppercase']")
+        placeOrder_btn = NormalPurchase.find_element(self.driver, "//button[@class = 'd-lg-ib fs14-sm ncss-brand ncss-btn-accent pb2-lg pb3-sm prl5-sm pt2-lg pt3-sm u-uppercase']")
         # capture_page(driver, "order.html")
         NormalPurchase.clk_button(self.driver, placeOrder_btn)
 

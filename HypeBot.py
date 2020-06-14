@@ -1,4 +1,6 @@
 import time
+import sys
+import os
 from datetime import datetime
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -62,7 +64,8 @@ class NormalPurchase:
 
     @staticmethod
     def capture_page(driver, name):
-        with open(name, "x") as f:
+        timestr = time.strftime("%m.%d.%y-%H:%M.%S")
+        with open(os.path.join('/Users/courtmiddleton/Desktop/ResumeProjs/HypeBot/captures', name + timestr + '.html'), "x") as f:
             f.write(driver.page_source)
 
     @staticmethod
@@ -71,6 +74,7 @@ class NormalPurchase:
             button = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, xpath)))
             return button
         except (TimeoutError, TimeoutException):
+            driver.refresh()
             print('timedout :/ : ' + xpath)
 
 
@@ -95,10 +99,10 @@ class NormalPurchase:
         self.driver.refresh()
         # # pick your size and add to cart
         size_btn = NormalPurchase.find_element(self.driver, "//button[starts-with(text(), 'M " + self.shoe_size + "') or starts-with(text(), " + self.shoe_size + ")]")
-        # capture_page(driver, 'clcik.html')
+        # capture_page(driver, 'clcik')
         NormalPurchase.clk_button(self.driver, size_btn)
         addToCart_btn = NormalPurchase.find_element(self.driver, "//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
-        # NormalPurchase.capture_page(self.driver, 'addtocart.html')
+        # NormalPurchase.capture_page(self.driver, 'addtocart')
         NormalPurchase.clk_button(self.driver, addToCart_btn)
         # try:
         #     proceed = self.driver.find_element_by_xpath("//span[class='cart-count-jewel small fs10-sm lh10-sm d-sm-b text-color-white bg-accent ta-sm-c']")
@@ -127,6 +131,7 @@ class NormalPurchase:
         placeOrder_btn = NormalPurchase.find_element(self.driver, "//button[@class = 'd-lg-ib fs14-sm ncss-brand ncss-btn-accent pb2-lg pb3-sm prl5-sm pt2-lg pt3-sm u-uppercase']")
         # capture_page(driver, "order.html")
         NormalPurchase.clk_button(self.driver, placeOrder_btn)
+        sys.exit()
 
 
 

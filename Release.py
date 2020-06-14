@@ -31,10 +31,10 @@ class Release(NormalPurchase):
         self.driver.refresh()
         # # pick your size and add to cart
         size_btn = NormalPurchase.find_element(self.driver, "//button[starts-with(text(), 'M " + self.shoe_size + "') or starts-with(text(), " + self.shoe_size + ")]")
-        # capture_page(driver, 'clcik.html')
+        NormalPurchase.capture_page(self.driver, 'release_size')
         NormalPurchase.clk_button(self.driver, size_btn)
         addToCart_btn = NormalPurchase.find_element(self.driver, "//div[@class = 'mt2-sm mb6-sm prl0-lg fs14-sm']/button[1]")
-        # NormalPurchase.capture_page(self.driver, 'addtocart.html')
+        NormalPurchase.capture_page(self.driver, 'release_addtocart')
         NormalPurchase.clk_button(self.driver, addToCart_btn)
         # if checkout modal is not loaded, the checkout button probably didn't get clicked
         try:
